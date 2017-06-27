@@ -1,94 +1,59 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelo;
 
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Objects;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.validator.constraints.NotBlank;
 
-/**
- *
- * @author Matheus Levi
- */
 @Entity
-@Table(name = "usuario", catalog = "vegetaurante", schema = "")
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u"),
-    @NamedQuery(name = "Usuario.findByIdUsuario", query = "SELECT u FROM Usuario u WHERE u.idUsuario = :idUsuario"),
-    @NamedQuery(name = "Usuario.findByNome", query = "SELECT u FROM Usuario u WHERE u.nome = :nome"),
-    @NamedQuery(name = "Usuario.findBySenha", query = "SELECT u FROM Usuario u WHERE u.senha = :senha"),
-    @NamedQuery(name = "Usuario.findByTelefone", query = "SELECT u FROM Usuario u WHERE u.telefone = :telefone"),
-    @NamedQuery(name = "Usuario.findByCelular", query = "SELECT u FROM Usuario u WHERE u.celular = :celular")})
-public class Usuario implements Serializable {
+@NamedQueries(value = 
+        {@NamedQuery(name = "Usuario.RetornaUsuario", query= " SELECT u FROM Usuario u WHERE u.telefone = :tel")})
+@Table(name = "TB_USUARIO")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "DISC_USUARIO", discriminatorType = DiscriminatorType.STRING, length = 1)
+public abstract class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "idUsuario")
-    private Integer idUsuario;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "nome")
-    private String nome;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 200)
-    @Column(name = "senha")
-    private String senha;
-    @Size(max = 15)
-    @Column(name = "telefone")
-    private String telefone;
-    @Size(max = 16)
-    @Column(name = "celular")
-    private String celular;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUsuario")
-    private List<Cliente> clienteList;
-    @JoinColumn(name = "idEndereco", referencedColumnName = "idEndereco")
-    @ManyToOne(optional = false)
-    private Endereco idEndereco;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idUsuario")
-    private List<Funcionario> funcionarioList;
-
-    public Usuario() {
-    }
-
-    public Usuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public Usuario(Integer idUsuario, String nome, String senha) {
-        this.idUsuario = idUsuario;
+    
+    public Usuario(String nome, String senha, String tel, Endereco end){
         this.nome = nome;
         this.senha = senha;
+        this.telefone = tel;
+        this.endereco = end;
     }
-
-    public Integer getIdUsuario() {
-        return idUsuario;
+    
+    public Usuario(){
+        this.nome = "";
+        this.endereco = new Endereco();
     }
-
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Size(min = 2, max = 40)
+    @NotNull
+    @Column(name = "NOME")
+    private String nome;
+    
+    @NotBlank
+    @Column(name = "TELEFONE")
+    private String telefone;
+    
+    @NotBlank
+    @Column(name = "SENHA")
+    private String senha;
+    
+    @NotNull
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ID_ENDERECO", referencedColumnName = "ID_ENDERECO")
+    private Endereco endereco;
+    
+    public String getHorario() {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+        return "Atualizado em " + sdf.format(new Date());
     }
 
     public String getNome() {
@@ -99,12 +64,12 @@ public class Usuario implements Serializable {
         this.nome = nome;
     }
 
-    public String getSenha() {
-        return senha;
+    public Endereco getEndereco() {
+        return endereco;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
     }
 
     public String getTelefone() {
@@ -115,63 +80,43 @@ public class Usuario implements Serializable {
         this.telefone = telefone;
     }
 
-    public String getCelular() {
-        return celular;
+    public String getSenha() {
+        return senha;
     }
 
-    public void setCelular(String celular) {
-        this.celular = celular;
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+    
+    public Long getId() {
+        return id;
     }
 
-    @XmlTransient
-    public List<Cliente> getClienteList() {
-        return clienteList;
+    public void setId(Long id) {
+        this.id = id;
     }
-
-    public void setClienteList(List<Cliente> clienteList) {
-        this.clienteList = clienteList;
-    }
-
-    public Endereco getIdEndereco() {
-        return idEndereco;
-    }
-
-    public void setIdEndereco(Endereco idEndereco) {
-        this.idEndereco = idEndereco;
-    }
-
-    @XmlTransient
-    public List<Funcionario> getFuncionarioList() {
-        return funcionarioList;
-    }
-
-    public void setFuncionarioList(List<Funcionario> funcionarioList) {
-        this.funcionarioList = funcionarioList;
+    
+    @Override
+    public String toString(){
+        String s = "";
+        
+        s += "Nome: " + this.getNome() + " Endereço: " + this.getEndereco();
+        
+        return s;
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (idUsuario != null ? idUsuario.hashCode() : 0);
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.id);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Usuario)) {
-            return false;
-        }
-        Usuario other = (Usuario) object;
-        if ((this.idUsuario == null && other.idUsuario != null) || (this.idUsuario != null && !this.idUsuario.equals(other.idUsuario))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "modelo.Usuario[ idUsuario=" + idUsuario + " ]";
+    public boolean equals(Usuario usu) {
+        return this.telefone.equals(usu.telefone);
     }
     
+    public abstract char tipo();
+    
 }
+

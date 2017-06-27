@@ -1,64 +1,56 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelo;
 
+import beans.BaseEntity;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.validator.constraints.NotBlank;
+import servico.BandeiraServico;
 
-/**
- *
- * @author Matheus Levi
- */
+@ManagedBean(name = "bandeiraMB")
+@SessionScoped
 @Entity
-@Table(name = "bandeira", catalog = "vegetaurante", schema = "")
-@XmlRootElement
+@Table(name = "TB_BANDEIRA")
 @NamedQueries({
-    @NamedQuery(name = "Bandeira.findAll", query = "SELECT b FROM Bandeira b"),
-    @NamedQuery(name = "Bandeira.findByIdBandeira", query = "SELECT b FROM Bandeira b WHERE b.idBandeira = :idBandeira"),
-    @NamedQuery(name = "Bandeira.findByNome", query = "SELECT b FROM Bandeira b WHERE b.nome = :nome")})
-public class Bandeira implements Serializable {
+    @NamedQuery(name = "Bandeira.TODAS", query = "SELECT e FROM Bandeira e ORDER BY e.nome"),
+    @NamedQuery(name = "Bandeira.BANDEIRA_POR_NOME", query = "SELECT u FROM Bandeira u WHERE u.nome = ?1")
+})
+public class Bandeira implements Serializable, BaseEntity {
     private static final long serialVersionUID = 1L;
+    
+    public Bandeira(){
+        this.cartoes = new ArrayList<>();
+    }
+    
+    public Bandeira(String n){
+        this.cartoes = new ArrayList<>();
+        this.nome = n;
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "idBandeira")
-    private Integer idBandeira;
-    @Size(max = 45)
-    @Column(name = "nome")
+    @Column(name = "ID_BANDEIRA")
+    private Long id;
+    
+    @OneToMany(mappedBy = "bandeira", fetch = FetchType.LAZY)
+    private final List<Cartao> cartoes;
+    
+    @NotBlank
+    @Size(max = 20)
+    @Column(name = "BANDEIRA_NOME")
     private String nome;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idBandeira")
-    private List<Cartao> cartaoList;
 
-    public Bandeira() {
+    @Override
+    public Long getId() {
+        return id;
     }
 
-    public Bandeira(Integer idBandeira) {
-        this.idBandeira = idBandeira;
-    }
-
-    public Integer getIdBandeira() {
-        return idBandeira;
-    }
-
-    public void setIdBandeira(Integer idBandeira) {
-        this.idBandeira = idBandeira;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -68,39 +60,36 @@ public class Bandeira implements Serializable {
     public void setNome(String nome) {
         this.nome = nome;
     }
-
-    @XmlTransient
-    public List<Cartao> getCartaoList() {
-        return cartaoList;
+    
+    public void addCartao(Cartao c){
+        this.cartoes.add(c);
     }
-
-    public void setCartaoList(List<Cartao> cartaoList) {
-        this.cartaoList = cartaoList;
+    
+    public List<Bandeira> getListaBandeiras(){
+        BandeiraServico bdao = new BandeiraServico();
+        return bdao.todasBandeiras();
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idBandeira != null ? idBandeira.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Bandeira)) {
-            return false;
-        }
-        Bandeira other = (Bandeira) object;
-        if ((this.idBandeira == null && other.idBandeira != null) || (this.idBandeira != null && !this.idBandeira.equals(other.idBandeira))) {
-            return false;
-        }
-        return true;
+    public List<Cartao> getCartoes() {
+        return cartoes;
     }
-
+    
     @Override
-    public String toString() {
-        return "modelo.Bandeira[ idBandeira=" + idBandeira + " ]";
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+        return ((Bandeira) obj).getNome().equals(this.nome);
+    }
+    
+    @Override
+    public String toString(){
+        return this.nome;
     }
     
 }

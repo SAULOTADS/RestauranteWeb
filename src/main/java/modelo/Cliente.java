@@ -1,106 +1,51 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelo;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.*;
 
-/**
- *
- * @author Matheus Levi
- */
 @Entity
-@Table(name = "cliente", catalog = "vegetaurante", schema = "")
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c"),
-    @NamedQuery(name = "Cliente.findByIdCliente", query = "SELECT c FROM Cliente c WHERE c.idCliente = :idCliente")})
-public class Cliente implements Serializable {
+@Table(name = "TB_CLIENTE")
+@PrimaryKeyJoinColumn(name = "ID_CLIENTE")
+@DiscriminatorValue(value = "C")
+public class Cliente extends Usuario {
     private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "idCliente")
-    private Integer idCliente;
-    @JoinColumn(name = "idUsuario", referencedColumnName = "idUsuario")
-    @ManyToOne(optional = false)
-    private Usuario idUsuario;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idCliente")
-    private List<Pedido> pedidoList;
+    
+    public Cliente(String nome, String senha, String tel, Endereco end, Cartao cartao){
+        super(nome,senha,tel,end); 
+        this.pedidos = new ArrayList<>();   
+        this.cartao = cartao;
+    }
+    
+    public Cliente(){
+        this.pedidos = new ArrayList<>();
+    }
+    
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ID_CARTAO", referencedColumnName = "ID_CARTAO")
+    private Cartao cartao;
+    
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Pedido> pedidos;
 
-    public Cliente() {
+    public List<Pedido> getPedidos() {
+        return pedidos;
     }
 
-    public Cliente(Integer idCliente) {
-        this.idCliente = idCliente;
+    public void addPedido(Pedido pedido) {
+        pedidos.add(pedido);
     }
 
-    public Integer getIdCliente() {
-        return idCliente;
+    public Cartao getCartao() {
+        return cartao;
     }
 
-    public void setIdCliente(Integer idCliente) {
-        this.idCliente = idCliente;
+    public void setCartao(Cartao cartao) {
+        this.cartao = cartao;
     }
-
-    public Usuario getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Usuario idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    @XmlTransient
-    public List<Pedido> getPedidoList() {
-        return pedidoList;
-    }
-
-    public void setPedidoList(List<Pedido> pedidoList) {
-        this.pedidoList = pedidoList;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (idCliente != null ? idCliente.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Cliente)) {
-            return false;
-        }
-        Cliente other = (Cliente) object;
-        if ((this.idCliente == null && other.idCliente != null) || (this.idCliente != null && !this.idCliente.equals(other.idCliente))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "modelo.Cliente[ idCliente=" + idCliente + " ]";
+    
+    public char tipo(){
+        return 'C';
     }
     
 }

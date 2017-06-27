@@ -1,106 +1,87 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelo;
 
 import java.io.Serializable;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.persistence.*;
+import javax.validation.constraints.*;
 
-/**
- *
- * @author Matheus Levi
- */
 @Entity
-@Table(name = "item_pedido", catalog = "vegetaurante", schema = "")
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "ItemPedido.findAll", query = "SELECT i FROM ItemPedido i"),
-    @NamedQuery(name = "ItemPedido.findByIdItemPedido", query = "SELECT i FROM ItemPedido i WHERE i.idItemPedido = :idItemPedido"),
-    @NamedQuery(name = "ItemPedido.findByQuantidade", query = "SELECT i FROM ItemPedido i WHERE i.quantidade = :quantidade"),
-    @NamedQuery(name = "ItemPedido.findBySubtotal", query = "SELECT i FROM ItemPedido i WHERE i.subtotal = :subtotal")})
+@Table(name = "TB_ITEMPEDIDO")
 public class ItemPedido implements Serializable {
     private static final long serialVersionUID = 1L;
+    
+    public ItemPedido(Prato p, int q, Pedido ped){
+        this.prato = p;
+        this.quantidade = q;
+        this.pedido = ped;
+        this.subtotal = p.getPreco()*q;
+    }
+    
+    public ItemPedido(){};
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "idItemPedido")
-    private Integer idItemPedido;
-    @Column(name = "quantidade")
-    private Integer quantidade;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Column(name = "subtotal")
-    private Float subtotal;
-    @JoinColumn(name = "idMenu", referencedColumnName = "idPrato")
-    @ManyToOne(optional = false)
-    private Prato idMenu;
-    @JoinColumn(name = "idPedido", referencedColumnName = "idPedido")
-    @ManyToOne(optional = false)
-    private Pedido idPedido;
+    @Column(name = "ID_ITEMPEDIDO")
+    private Long id;
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_PRATO", referencedColumnName = "ID_PRATO")
+    private Prato prato;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_PEDIDO", referencedColumnName = "ID_PEDIDO")
+    private Pedido pedido;
+    
+    @Min(1)
+    @Column(name = "ITEMPEDIDO_QUANTIDADE")
+    private int quantidade;
+    
+    @Column(name = "ITEMPEDIDO_SUBTOTAL")
+    private double subtotal;
 
-    public ItemPedido() {
+    public Long getId() {
+        return id;
     }
 
-    public ItemPedido(Integer idItemPedido) {
-        this.idItemPedido = idItemPedido;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Integer getIdItemPedido() {
-        return idItemPedido;
+    public Prato getPrato() {
+        return prato;
     }
 
-    public void setIdItemPedido(Integer idItemPedido) {
-        this.idItemPedido = idItemPedido;
+    public void setPrato(Prato prato) {
+        this.prato = prato;
     }
 
-    public Integer getQuantidade() {
+    public int getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(Integer quantidade) {
+    public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
     }
 
-    public Float getSubtotal() {
-        return subtotal;
+    public double getSubtotal() {
+        return Math.round(100*this.subtotal)/100;
     }
 
-    public void setSubtotal(Float subtotal) {
-        this.subtotal = subtotal;
+    public void setSubtotal(){
+        this.subtotal = this.getSubtotal();
     }
 
-    public Prato getIdMenu() {
-        return idMenu;
+    public Pedido getPedido() {
+        return pedido;
     }
 
-    public void setIdMenu(Prato idMenu) {
-        this.idMenu = idMenu;
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
     }
-
-    public Pedido getIdPedido() {
-        return idPedido;
-    }
-
-    public void setIdPedido(Pedido idPedido) {
-        this.idPedido = idPedido;
-    }
-
+    
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idItemPedido != null ? idItemPedido.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -111,7 +92,7 @@ public class ItemPedido implements Serializable {
             return false;
         }
         ItemPedido other = (ItemPedido) object;
-        if ((this.idItemPedido == null && other.idItemPedido != null) || (this.idItemPedido != null && !this.idItemPedido.equals(other.idItemPedido))) {
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -119,7 +100,8 @@ public class ItemPedido implements Serializable {
 
     @Override
     public String toString() {
-        return "modelo.ItemPedido[ idItemPedido=" + idItemPedido + " ]";
+        return "Prato: " + this.prato.getNome() + " Quantidade: " + this.quantidade + " Subtotal: " + this.getSubtotal();
     }
     
 }
+

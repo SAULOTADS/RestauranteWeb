@@ -1,93 +1,72 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelo;
 
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.validator.constraints.*;
 
-/**
- *
- * @author Matheus Levi
- */
 @Entity
-@Table(name = "endereco", catalog = "vegetaurante", schema = "")
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Endereco.findAll", query = "SELECT e FROM Endereco e"),
-    @NamedQuery(name = "Endereco.findByIdEndereco", query = "SELECT e FROM Endereco e WHERE e.idEndereco = :idEndereco"),
-    @NamedQuery(name = "Endereco.findByLogradouro", query = "SELECT e FROM Endereco e WHERE e.logradouro = :logradouro"),
-    @NamedQuery(name = "Endereco.findByBairro", query = "SELECT e FROM Endereco e WHERE e.bairro = :bairro"),
-    @NamedQuery(name = "Endereco.findByCidade", query = "SELECT e FROM Endereco e WHERE e.cidade = :cidade"),
-    @NamedQuery(name = "Endereco.findByCep", query = "SELECT e FROM Endereco e WHERE e.cep = :cep")})
+@Table(name = "TB_ENDERECO")
 public class Endereco implements Serializable {
     private static final long serialVersionUID = 1L;
+    
+    public Endereco(String tl, String l, int n, String c, String cid, String es){
+        this.tipoLogradouro = tl;
+        this.logradouro = l;
+        this.numero = n;
+        this.cep = c;
+        this.cidade = cid;
+        this.estado = es;                
+    }
+    
+    public Endereco(){};
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "idEndereco")
-    private Integer idEndereco;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 150)
-    @Column(name = "logradouro")
+    @Column(name = "ID_ENDERECO")
+    private Long id;
+
+    @NotBlank
+    @Column(name = "END_TIPOLOGRADOURO")
+    private String tipoLogradouro;
+    
+    @NotBlank
+    @Column(name = "END_LOGRADOURO")
     private String logradouro;
-    @Basic(optional = false)
+    
     @NotNull
-    @Size(min = 1, max = 60)
-    @Column(name = "bairro")
-    private String bairro;
-    @Basic(optional = false)
+    @Column(name = "END_NUMERO")
+    private int numero;
+    
     @NotNull
-    @Size(min = 1, max = 80)
-    @Column(name = "cidade")
-    private String cidade;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 11)
-    @Column(name = "cep")
+    @Column(name = "END_CEP")
     private String cep;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idEndereco")
-    private List<Usuario> usuarioList;
-
-    public Endereco() {
+    
+    @NotBlank
+    @Size(max = 40)
+    @Column(name = "END_CIDADE")
+    private String cidade;
+    
+    @Size(min = 2, max = 2)
+    @Column(name = "END_ESTADO")
+    private String estado;
+    
+    public Long getId() {
+        return id;
     }
 
-    public Endereco(Integer idEndereco) {
-        this.idEndereco = idEndereco;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Endereco(Integer idEndereco, String logradouro, String bairro, String cidade, String cep) {
-        this.idEndereco = idEndereco;
-        this.logradouro = logradouro;
-        this.bairro = bairro;
-        this.cidade = cidade;
-        this.cep = cep;
+    public String getTipoLogradouro() {
+        return tipoLogradouro;
     }
 
-    public Integer getIdEndereco() {
-        return idEndereco;
-    }
-
-    public void setIdEndereco(Integer idEndereco) {
-        this.idEndereco = idEndereco;
+    public void setTipoLogradouro(String tipoLogradouro) {
+        this.tipoLogradouro = tipoLogradouro;
     }
 
     public String getLogradouro() {
@@ -98,20 +77,12 @@ public class Endereco implements Serializable {
         this.logradouro = logradouro;
     }
 
-    public String getBairro() {
-        return bairro;
+    public int getNumero() {
+        return numero;
     }
 
-    public void setBairro(String bairro) {
-        this.bairro = bairro;
-    }
-
-    public String getCidade() {
-        return cidade;
-    }
-
-    public void setCidade(String cidade) {
-        this.cidade = cidade;
+    public void setNumero(int numero) {
+        this.numero = numero;
     }
 
     public String getCep() {
@@ -122,38 +93,43 @@ public class Endereco implements Serializable {
         this.cep = cep;
     }
 
-    @XmlTransient
-    public List<Usuario> getUsuarioList() {
-        return usuarioList;
+    public String getCidade() {
+        return cidade;
     }
 
-    public void setUsuarioList(List<Usuario> usuarioList) {
-        this.usuarioList = usuarioList;
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
     }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }   
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idEndereco != null ? idEndereco.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Endereco)) {
-            return false;
-        }
-        Endereco other = (Endereco) object;
-        if ((this.idEndereco == null && other.idEndereco != null) || (this.idEndereco != null && !this.idEndereco.equals(other.idEndereco))) {
-            return false;
-        }
+    public boolean equals(Endereco end) {
+        if(!this.tipoLogradouro.equals(end.getTipoLogradouro())) return false;
+        else if(!this.logradouro.equals(end.getLogradouro())) return false;
+        else if(!this.cidade.equals(end.getCidade())) return false;
+        else if(!this.estado.equals(end.getEstado())) return false;
+        else if(!this.cep.equals(end.getCep())) return false;
+        else if(this.numero != end.getNumero()) return false;
+        
         return true;
     }
 
     @Override
     public String toString() {
-        return "modelo.Endereco[ idEndereco=" + idEndereco + " ]";
+        return "Endereço: " + this.getTipoLogradouro() + " " + this.getLogradouro() + ", " + this.getNumero() + ", " + this.getCep() + ", " + this.getCidade() + "-" + this.getEstado();
     }
     
 }
