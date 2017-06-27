@@ -1,0 +1,6 @@
+    
+header#cabecalho{
+   background-image: url("#{resource['images/texturasalada.jpg']}") !important; 
+   background-repeat: repeat-x;
+   background-size: contain;
+}
